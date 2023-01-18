@@ -1,0 +1,10 @@
+{
+  "require": {
+    "symfony/http-client": "^6.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wpsync\\": "src/"
+    }
+  }
+}
