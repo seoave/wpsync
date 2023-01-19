@@ -8,45 +8,36 @@
  */
 
 define("WP_USE_THEMES", false);
-require_once('../../../wp-blog-header.php');
-require 'vendor/autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\RetryableHttpClient;
+use Wpsync\Service\HttpRequestService;
+use Wpsync\Repository\NewProductsRepository;
+use Wpsync\Repository\OldProductsRepository;
+use Wpsync\Service\SortService;
 
-$apiURL = 'https://wp.webspark.dev/wp-api/products/';
-$client = new RetryableHttpClient(HttpClient::create());
+global $product;
+$isRequest = false;
 
-$response = $client->request('GET', $apiURL, [
-    'timeout' => 20,
-]);
+if ($isRequest) {
+    $newProducts = (new HttpRequestService())->makeRequest();
+}
 
-$statusCode = $response->getStatusCode();
-var_dump($statusCode);
+if (! empty($newProducts)) {
+    $newSKUs = NewProductsRepository::getArraySku($newProducts);
+    var_dump($newSKUs); // TODO remove
+}
 
+$oldProducts = (new OldProductsRepository())->findAll();
+$oldSKUs = OldProductsRepository::getArraySku($oldProducts);
+var_dump($oldSKUs);
 
+$skuToCreate = SortService::skuToCreate($newSKUs, $oldSKUs);
+$skuToDelete = SortService::skuToDelete($oldSKUs, $newSKUs);
+$skuToUpdate = SortService::skuToUpdate($newSKUs, $oldSKUs);
 
-
-
-
-
-
-// TODO get all products
-//$products = wc_get_products(['status' => 'publish', 'limit' => -1]);
-//var_dump($products);
-
-// TODO get $content sku
-
-// TODO get $products sku
-
-// TODO find removed products by sku
-// TODO find new products by sku
-// TODO find update products by sku
-
-// TODO loop $content
-// TODO in loop check products.sku and products.sku
-// TODO in loop if exists - update product
-// TODO in loop if does not - create new product
+//var_dump(count($skuToDelete));
+//var_dump(count($skuToCreate));
+//var_dump(count($skuToUpdate));
 
 // TODO create new product
 //$post_id = wp_insert_post(array(
