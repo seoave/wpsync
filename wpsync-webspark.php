@@ -11,33 +11,37 @@ define("WP_USE_THEMES", false);
 require_once __DIR__ . '/bootstrap.php';
 
 use Wpsync\Service\HttpRequestService;
+use Wpsync\Repository\NewProductsRepository;
+use Wpsync\Repository\OldProductsRepository;
 
-$newProducts = (new HttpRequestService())->makeRequest();
+global $product;
+$isRequest = false;
 
-$newSKUs = [];
-
-foreach ($newProducts as $product) {
-    $newSKUs[] = $product['sku'];
+if ($isRequest) {
+    $newProducts = (new HttpRequestService())->makeRequest();
 }
 
-var_dump($newSKUs);
+if (! empty($newProducts)) {
+    $newSKUs = NewProductsRepository::getArraySku($newProducts);
+    var_dump($newSKUs); // TODO remove
+}
 
+$oldProducts = (new OldProductsRepository())->findAll();
+$oldSKUs = OldProductsRepository::getArraySku($oldProducts);
+var_dump($oldSKUs);
 
-//$products = wc_get_products(['status' => 'publish', 'limit' => -1]);
-//var_dump($products);
+$skuToCreate = [];
+$skuToDelete = [];
+$skuToUpdate = [];
 
-// TODO get $content sku
+$newSKUs = ['aaa', 'bbb', 'ccc', 'test2sku'];
 
-// TODO get $products sku
-
-// TODO find removed products by sku
-// TODO find new products by sku
-// TODO find update products by sku
-
-// TODO loop $content
-// TODO in loop check products.sku and products.sku
-// TODO in loop if exists - update product
-// TODO in loop if does not - create new product
+$skuToCreate = array_diff($newSKUs, $oldSKUs);
+$skuToDelete = array_diff($oldSKUs, $newSKUs);
+$skuToUpdate = array_intersect($newSKUs, $oldSKUs);
+//var_dump($skuToDelete);
+//var_dump($skuToCreate);
+//var_dump($skuToUpdate);
 
 // TODO create new product
 //$post_id = wp_insert_post(array(
