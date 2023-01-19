@@ -17,21 +17,29 @@ use Symfony\Component\HttpClient\RetryableHttpClient;
 $apiURL = 'https://wp.webspark.dev/wp-api/products/';
 $client = new RetryableHttpClient(HttpClient::create());
 
-$response = $client->request('GET', $apiURL, [
-    'timeout' => 20,
-]);
+do {
+    $response = $client->request('GET', $apiURL, [
+        'timeout' => 20,
+    ]);
+    $statusCode = $response->getStatusCode();
+    var_dump($statusCode); // TODO remove
 
-$statusCode = $response->getStatusCode();
-var_dump($statusCode);
+    // TODO get all products
+    $newData = $response->toArray();
+    $newProducts = $newData['data'];
+    var_dump(count($newProducts));
+} while (count($newProducts) < 2000);
+
+foreach ($newProducts as $product) {
+    $newSKUs[] = $product['sku'];
+}
+
+var_dump($newSKUs);
 
 
 
 
 
-
-
-
-// TODO get all products
 //$products = wc_get_products(['status' => 'publish', 'limit' => -1]);
 //var_dump($products);
 
