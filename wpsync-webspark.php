@@ -25,12 +25,11 @@ if ($isRequest) {
 
 if (! empty($newProducts)) {
     $newSKUs = NewProductsRepository::getArraySku($newProducts);
-    var_dump($newSKUs); // TODO remove
 }
 
 $oldProducts = (new OldProductsRepository())->findAll();
 $oldSKUs = OldProductsRepository::getArraySku($oldProducts);
-//var_dump($oldSKUs);
+
 
 $skuToCreate = SortService::skuToCreate($newSKUs, $oldSKUs);
 //$skuToDelete = SortService::skuToDelete($oldSKUs, $newSKUs);
@@ -47,15 +46,3 @@ var_dump($createProducts);
 //var_dump(count($skuToCreate));
 //var_dump(count($skuToUpdate));
 
-// TODO create new product
-//$post_id = wp_insert_post(array(
-//    'post_title' => $title,
-//    'post_type' => 'product',
-//    'post_status' => 'publish',
-//    'post_content' => $body,
-//));
-//$product = wc_get_product($post_id);
-//$product->set_sku($sku);
-//$product->set_price($price);
-//$product->set_regular_price($regular_price);
-//$product->save();
