@@ -8,19 +8,19 @@
  */
 
 define("WP_USE_THEMES", false);
-require_once('../../../wp-blog-header.php');
-require 'vendor/autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\RetryableHttpClient;
+use Wpsync\Configuration;
+use Wpsync\Service\HttpClientService;
 
-$apiURL = 'https://wp.webspark.dev/wp-api/products/';
-$client = new RetryableHttpClient(HttpClient::create());
+$client = (new HttpClientService())->getClient();
 
 do {
-    $response = $client->request('GET', $apiURL, [
-        'timeout' => 20,
-    ]);
+    $response = $client->request(
+        method: Configuration::getParameter('apiMethod'),
+        url: Configuration::getParameter('apiURL'),
+        options: Configuration::getParameter('apiOptions'));
+
     $statusCode = $response->getStatusCode();
     var_dump($statusCode); // TODO remove
 
@@ -29,6 +29,8 @@ do {
     $newProducts = $newData['data'];
     var_dump(count($newProducts));
 } while (count($newProducts) < 2000);
+
+$newSKUs = [];
 
 foreach ($newProducts as $product) {
     $newSKUs[] = $product['sku'];
