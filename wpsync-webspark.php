@@ -8,53 +8,40 @@
  */
 
 define("WP_USE_THEMES", false);
-require_once('../../../wp-blog-header.php');
-require 'vendor/autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Component\HttpClient\RetryableHttpClient;
+use Wpsync\Service\HttpRequestService;
+use Wpsync\Repository\NewProductsRepository;
+use Wpsync\Repository\OldProductsRepository;
 
-$apiURL = 'https://wp.webspark.dev/wp-api/products/';
-$client = new RetryableHttpClient(HttpClient::create());
+global $product;
+$isRequest = false;
 
-do {
-    $response = $client->request('GET', $apiURL, [
-        'timeout' => 20,
-    ]);
-    $statusCode = $response->getStatusCode();
-    var_dump($statusCode); // TODO remove
-
-    // TODO get all products
-    $newData = $response->toArray();
-    $newProducts = $newData['data'];
-    var_dump(count($newProducts));
-} while (count($newProducts) < 2000);
-
-foreach ($newProducts as $product) {
-    $newSKUs[] = $product['sku'];
+if ($isRequest) {
+    $newProducts = (new HttpRequestService())->makeRequest();
 }
 
-var_dump($newSKUs);
+if (! empty($newProducts)) {
+    $newSKUs = NewProductsRepository::getArraySku($newProducts);
+    var_dump($newSKUs); // TODO remove
+}
 
+$oldProducts = (new OldProductsRepository())->findAll();
+$oldSKUs = OldProductsRepository::getArraySku($oldProducts);
+var_dump($oldSKUs);
 
+$skuToCreate = [];
+$skuToDelete = [];
+$skuToUpdate = [];
 
+$newSKUs = ['aaa', 'bbb', 'ccc', 'test2sku'];
 
-
-//$products = wc_get_products(['status' => 'publish', 'limit' => -1]);
-//var_dump($products);
-
-// TODO get $content sku
-
-// TODO get $products sku
-
-// TODO find removed products by sku
-// TODO find new products by sku
-// TODO find update products by sku
-
-// TODO loop $content
-// TODO in loop check products.sku and products.sku
-// TODO in loop if exists - update product
-// TODO in loop if does not - create new product
+$skuToCreate = array_diff($newSKUs, $oldSKUs);
+$skuToDelete = array_diff($oldSKUs, $newSKUs);
+$skuToUpdate = array_intersect($newSKUs, $oldSKUs);
+//var_dump($skuToDelete);
+//var_dump($skuToCreate);
+//var_dump($skuToUpdate);
 
 // TODO create new product
 //$post_id = wp_insert_post(array(
