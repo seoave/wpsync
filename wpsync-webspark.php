@@ -10,25 +10,9 @@
 define("WP_USE_THEMES", false);
 require_once __DIR__ . '/bootstrap.php';
 
-use Wpsync\Configuration;
-use Wpsync\Service\HttpClientService;
+use Wpsync\Service\HttpRequestService;
 
-$client = (new HttpClientService())->getClient();
-
-do {
-    $response = $client->request(
-        method: Configuration::getParameter('apiMethod'),
-        url: Configuration::getParameter('apiURL'),
-        options: Configuration::getParameter('apiOptions'));
-
-    $statusCode = $response->getStatusCode();
-    var_dump($statusCode); // TODO remove
-
-    // TODO get all products
-    $newData = $response->toArray();
-    $newProducts = $newData['data'];
-    var_dump(count($newProducts));
-} while (count($newProducts) < 2000);
+$newProducts = (new HttpRequestService())->makeRequest();
 
 $newSKUs = [];
 
@@ -37,9 +21,6 @@ foreach ($newProducts as $product) {
 }
 
 var_dump($newSKUs);
-
-
-
 
 
 //$products = wc_get_products(['status' => 'publish', 'limit' => -1]);
