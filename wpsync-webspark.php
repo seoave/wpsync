@@ -7,42 +7,29 @@
  *
  */
 
-define("WP_USE_THEMES", false);
 require_once __DIR__ . '/bootstrap.php';
 
-use Wpsync\Service\HttpRequestService;
-use Wpsync\Repository\NewProductsRepository;
-use Wpsync\Repository\OldProductsRepository;
-use Wpsync\Service\SortService;
-use Wpsync\Service\CreateProductService;
+use Wpsync\Controller\SyncController;
 
-global $product;
-$isRequest = true;
-
-if ($isRequest) {
-    $newProducts = (new HttpRequestService())->makeRequest();
+if (! wp_next_scheduled('sync_task_hourly')) {
+    wp_schedule_event(time(), 'hourly', 'sync_task_hourly');
 }
 
-if (! empty($newProducts)) {
-    $newSKUs = NewProductsRepository::getArraySku($newProducts);
+add_action('sync_task_hourly', 'startSync', 10, 3);
+
+function startSync(): void
+{
+    SyncController::getInstance()->sync();
 }
 
-$oldProducts = (new OldProductsRepository())->findAll();
-$oldSKUs = OldProductsRepository::getArraySku($oldProducts);
+add_filter('cron_schedules', 'customInterval');
 
+function customInterval($schedule)
+{
+    $schedule['every_minute'] = array(
+        'interval' => 60,
+        'display' => 'Every minute',
+    );
 
-$skuToCreate = SortService::skuToCreate($newSKUs, $oldSKUs);
-//$skuToDelete = SortService::skuToDelete($oldSKUs, $newSKUs);
-//$skuToUpdate = SortService::skuToUpdate($newSKUs, $oldSKUs);
-
-$createProducts = (new CreateProductService())->fiilterProductsToCreate($newProducts, $skuToCreate);
-
-var_dump($createProducts);
-
-(new CreateProductService())->createProducts($createProducts);
-
-
-//var_dump(count($skuToDelete));
-//var_dump(count($skuToCreate));
-//var_dump(count($skuToUpdate));
-
+    return $schedule;
+}
