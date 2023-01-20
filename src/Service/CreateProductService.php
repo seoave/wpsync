@@ -3,36 +3,18 @@ declare(strict_types=1);
 
 namespace Wpsync\Service;
 
-use WC_Product_Simple;
+use WC_Data_Exception;
+use Wpsync\Repository\ProductRepository;
 
 class CreateProductService
 {
-    public function fiilterProductsToCreate(array $newProducts, array $skuToCreate): array
+    /**
+     * @throws WC_Data_Exception
+     */
+    public static function createProducts(array $productsArray): void
     {
-        $createProducts = [];
-
-        foreach ($newProducts as $product) {
-            if (in_array($product['sku'], $skuToCreate)) {
-                $createProducts[] = $product;
-            }
-        }
-
-        return $createProducts;
-    }
-
-    public function createProducts(array $createProducts): void
-    {
-        foreach ($createProducts as $item) {
-            $newProduct = new WC_Product_Simple();
-            $newProduct->set_name($item['name']);
-            $newProduct->set_sku($item['sku']);
-            $newProduct->set_status("publish");
-            $newProduct->set_stock_quantity($item['in_stock']);
-            $newProduct->set_description($item['description']);
-            $newProduct->set_regular_price($item['price']);
-            $newProduct->set_regular_price($item['price']);
-            $newProduct->save();
+        foreach ($productsArray as $item) {
+            ProductRepository::createProductFromArray($item);
         }
     }
 }
-

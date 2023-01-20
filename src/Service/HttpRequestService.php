@@ -24,11 +24,13 @@ class HttpRequestService
                 url: Configuration::getParameter('apiURL'),
                 options: Configuration::getParameter('apiOptions'));
 
-            $newProducts = $this->transformToProducts($response);
-            var_dump(count($newProducts)); // TODO remove
-        } while (count($newProducts) < 2000);
+            $statusCode = $response->getStatusCode();
+            $products = $this->transformToProducts($response);
+            var_dump(count($products)); // TODO remove
+            var_dump($statusCode);
+        } while ($statusCode !== 200);
 
-        return $newProducts;
+        return $products;
     }
 
     public function transformToProducts(ResponseInterface $response): array
