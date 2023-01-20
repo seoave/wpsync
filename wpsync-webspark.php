@@ -7,50 +7,29 @@
  *
  */
 
-define("WP_USE_THEMES", false);
 require_once __DIR__ . '/bootstrap.php';
 
-use Wpsync\Service\HttpRequestService;
-use Wpsync\Repository\NewProductsRepository;
-use Wpsync\Repository\OldProductsRepository;
-use Wpsync\Service\SortService;
-use Wpsync\Service\CreateProductService;
-use Wpsync\Repository\ProductRepository;
-use Wpsync\Service\DeleteProductService;
-use Wpsync\Service\UpdateProductService;
+use Wpsync\Controller\SyncController;
 
-$isRequest = true;
-
-if ($isRequest) {
-    $newProducts = (new HttpRequestService())->makeRequest();
+if (! wp_next_scheduled('sync_task_hourly')) {
+    wp_schedule_event(time(), 'hourly', 'sync_task_hourly');
 }
 
-if (! empty($newProducts)) {
-    $newSKUs = NewProductsRepository::getArraySku($newProducts);
+add_action('sync_task_hourly', 'startSync', 10, 3);
+
+function startSync(): void
+{
+    SyncController::getInstance()->sync();
 }
 
-$oldProducts = (new OldProductsRepository())->findAll();
-$oldSKUs = OldProductsRepository::getArraySku($oldProducts);
+add_filter('cron_schedules', 'customInterval');
 
-if (! empty($newSKUs) && ! empty($oldSKUs)) {
-    $skuToCreate = SortService::skuToCreate($newSKUs, $oldSKUs);
-    $skuToDelete = SortService::skuToDelete($oldSKUs, $newSKUs);
-    $skuToUpdate = SortService::skuToUpdate($newSKUs, $oldSKUs);
+function customInterval($schedule)
+{
+    $schedule['every_minute'] = array(
+        'interval' => 60,
+        'display' => 'Every minute',
+    );
+
+    return $schedule;
 }
-
-//Create
-var_dump(count($skuToCreate));
-$createProducts = (new NewProductsRepository())->findProductsToCreate($newProducts, $skuToCreate);
-CreateProductService::createProducts($createProducts);
-
-// Update
-var_dump(count($skuToUpdate));
-$productsToUpdate = (new NewProductsRepository())->findProductsToUpdate($newProducts, $skuToUpdate);
-UpdateProductService::updateProducts($productsToUpdate);
-
-// Delete
-var_dump(count($skuToDelete));
-DeleteProductService::deleteProducts($skuToDelete);
-
-//$imageUrl = 'https://loremflickr.com/cache/resized/65535_52429670066_edd841377b_640_480_nofilter.jpg';
-//ProductRepository::uploadImage($imageUrl);

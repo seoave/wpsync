@@ -25,12 +25,12 @@ class HttpRequestService
                 options: Configuration::getParameter('apiOptions'));
 
             $statusCode = $response->getStatusCode();
-            $newProducts = $this->transformToProducts($response);
-            var_dump(count($newProducts)); // TODO remove
+            $products = $this->transformToProducts($response);
+            var_dump(count($products)); // TODO remove
             var_dump($statusCode);
         } while ($statusCode !== 200);
 
-        return $newProducts;
+        return $products;
     }
 
     public function transformToProducts(ResponseInterface $response): array

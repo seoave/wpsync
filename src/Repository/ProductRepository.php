@@ -5,25 +5,29 @@ namespace Wpsync\Repository;
 
 use WC_Data_Exception;
 use WC_Product_Simple;
-use WP_Error;
 
 class ProductRepository
 {
     /**
      * @throws WC_Data_Exception
      */
-    public static function createProductFromArray(array $array): WC_Product_Simple
+    public static function createProductFromArray(array $array): ?WC_Product_Simple
     {
-        $newProduct = new WC_Product_Simple();
-        $newProduct->set_name($array['name']);
-        $newProduct->set_sku($array['sku']);
-        $newProduct->set_status("publish");
-        $newProduct->set_stock_quantity($array['in_stock']);
-        $newProduct->set_description($array['description']);
-        $newProduct->set_regular_price($array['price']);
-        $newProduct->save();
+        $productId = wc_get_product_id_by_sku($array['sku']);
+        if (! $productId) {
+            $newProduct = new WC_Product_Simple();
+            $newProduct->set_name($array['name']);
+            $newProduct->set_sku($array['sku']);
+            $newProduct->set_status('publish');
+            $newProduct->set_stock_quantity($array['in_stock']);
+            $newProduct->set_description($array['description']);
+            $newProduct->set_regular_price($array['price']);
+            $newProduct->save();
 
-        return $newProduct;
+            return $newProduct;
+        }
+
+        return null;
     }
 
     public static function deleteProductBySku(string $sku): void
@@ -35,9 +39,6 @@ class ProductRepository
         }
     }
 
-    /**
-     * @throws WC_Data_Exception
-     */
     public static function updateProductFromArray(array $array): void
     {
         $productId = wc_get_product_id_by_sku($array['sku']);
@@ -47,7 +48,7 @@ class ProductRepository
         if ($productId) {
             $product = wc_get_product($productId);
 
-            if ($array['name'] != $product->get_name()) {
+            if ($array['name'] !== $product->get_name()) {
                 $product->set_name($array['name']);
             }
 
@@ -63,7 +64,7 @@ class ProductRepository
                 $product->set_stock_quantity($array['in_stock']);
             }
 
-            if ($defaultImageId !== $product->get_image_id()) {
+            if ($defaultImageId != $product->get_image_id()) {
                 $product->set_image_id($defaultImageId);
             }
 

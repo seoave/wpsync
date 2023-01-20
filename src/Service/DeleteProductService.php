@@ -13,7 +13,5 @@ class DeleteProductService
                 ProductRepository::deleteProductBySku($item);
             }
         }
-
-        echo 'Delete complete' . PHP_EOL;
     }
 }

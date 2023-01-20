@@ -19,7 +19,7 @@ class NewProductsRepository
             }
         }
 
-        return $newSKUs;
+        return array_unique($newSKUs);
     }
 
     public function findProductsToCreate(array $newProducts, array $skuToCreate): array

@@ -16,7 +16,5 @@ class CreateProductService
         foreach ($productsArray as $item) {
             ProductRepository::createProductFromArray($item);
         }
-
-        echo 'Create complete' . PHP_EOL;
     }
 }

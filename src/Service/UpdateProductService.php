@@ -18,6 +18,5 @@ class UpdateProductService
                 ProductRepository::updateProductFromArray($item);
             }
         }
-        echo 'Update complete' . PHP_EOL;
     }
 }
