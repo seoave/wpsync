@@ -17,8 +17,8 @@ use Wpsync\Service\SortService;
 use Wpsync\Service\CreateProductService;
 use Wpsync\Repository\ProductRepository;
 use Wpsync\Service\DeleteProductService;
+use Wpsync\Service\UpdateProductService;
 
-global $product;
 $isRequest = true;
 
 if ($isRequest) {
@@ -38,12 +38,19 @@ if (! empty($newSKUs) && ! empty($oldSKUs)) {
     $skuToUpdate = SortService::skuToUpdate($newSKUs, $oldSKUs);
 }
 
-// $createProducts = (new NewProductsRepository())->findProductsToCreate($newProducts, $skuToCreate);
+//Create
+var_dump(count($skuToCreate));
+$createProducts = (new NewProductsRepository())->findProductsToCreate($newProducts, $skuToCreate);
+CreateProductService::createProducts($createProducts);
 
-//(new CreateProductService())->createProducts($createProducts);
+// Update
+var_dump(count($skuToUpdate));
+$productsToUpdate = (new NewProductsRepository())->findProductsToUpdate($newProducts, $skuToUpdate);
+UpdateProductService::updateProducts($productsToUpdate);
 
-var_dump($skuToDelete);
-//var_dump(count($skuToCreate));
-//var_dump(count($skuToUpdate));
+// Delete
+var_dump(count($skuToDelete));
+DeleteProductService::deleteProducts($skuToDelete);
 
-//DeleteProductService::deleteProducts($skuToDelete);
+//$imageUrl = 'https://loremflickr.com/cache/resized/65535_52429670066_edd841377b_640_480_nofilter.jpg';
+//ProductRepository::uploadImage($imageUrl);

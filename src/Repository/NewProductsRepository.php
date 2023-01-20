@@ -27,11 +27,24 @@ class NewProductsRepository
         $createProducts = [];
 
         foreach ($newProducts as $product) {
-            if (in_array($product['sku'], $skuToCreate)) {
+            if (in_array($product['sku'], $skuToCreate, true)) {
                 $createProducts[] = $product;
             }
         }
 
         return $createProducts;
+    }
+
+    public function findProductsToUpdate(array $newProducts, array $skuToUpdate): array
+    {
+        $updatedProducts = [];
+
+        foreach ($newProducts as $product) {
+            if (in_array($product['sku'], $skuToUpdate, true)) {
+                $updatedProducts[] = $product;
+            }
+        }
+
+        return $updatedProducts;
     }
 }

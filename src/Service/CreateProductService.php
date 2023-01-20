@@ -11,10 +11,12 @@ class CreateProductService
     /**
      * @throws WC_Data_Exception
      */
-    public function createProducts(array $productsArray): void
+    public static function createProducts(array $productsArray): void
     {
         foreach ($productsArray as $item) {
             ProductRepository::createProductFromArray($item);
         }
+
+        echo 'Create complete' . PHP_EOL;
     }
 }

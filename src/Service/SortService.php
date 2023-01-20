@@ -12,7 +12,7 @@ class SortService
 
     public static function skuToUpdate(array $newSku, array $oldSku): array
     {
-        return array_diff($newSku, $oldSku);
+        return array_intersect($newSku, $oldSku);
     }
 
     public static function skuToDelete(array $oldSku, array $newSku): array
