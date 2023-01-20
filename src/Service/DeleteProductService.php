@@ -2,6 +2,8 @@
 
 namespace Wpsync\Service;
 
+use Wpsync\Repository\ProductRepository;
+
 class DeleteProductService
 {
     public static function deleteProducts(array $skuArray)
@@ -11,5 +13,7 @@ class DeleteProductService
                 ProductRepository::deleteProductBySku($item);
             }
         }
+
+        echo 'Delete complete' . PHP_EOL;
     }
 }
